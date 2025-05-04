@@ -1,0 +1,21 @@
+spring:
+  application:
+    name: crypto-data-api
+  datasource:
+    url: jdbc:postgresql://srv814560.hstgr.cloud:5432/crypto
+    username: crypto
+    password: crypto-signal
+  data:
+    redis:
+      host: srv814560.hstgr.cloud
+      port: 6379
+      username: default
+      password: b5wmHqFBNyKZ5wH6QmKS5ejp2wBCROki
+      timeout: 10000ms
+
+app:
+  webclient:
+    coindcx-base-url: https://api.coindcx.com
+    coindesk-base-url: https://data-api.coindesk.com
+    coindcx-market-endpoint: /exchange/v1/markets_details
+    coindesk-market-endpoint: /spot/v1/markets/instruments
