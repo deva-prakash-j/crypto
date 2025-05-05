@@ -26,7 +26,8 @@ public class CryptoDataApiApplication implements CommandLineRunner {
 		System.out.println("Hello");
 		System.out.println(discoveryService.getMarketData());
 		System.out.println(discoveryService.getMarketData().size());
-		backfillService.backFillDayData();
+		//backfillService.backFillDayData();
+		backfillService.backFillHourData();
 	}
 
 }

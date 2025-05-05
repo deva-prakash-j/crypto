@@ -45,7 +45,7 @@ public class CoinDeskClient {
         };
 
         try {
-            return coinDeskWebClient.get()
+        	return coinDeskWebClient.get()
                     .uri(uriBuilder -> uriBuilder
                             .path(path)
                             .queryParam("market", "coindcx")
@@ -61,7 +61,7 @@ public class CoinDeskClient {
                     .bodyToMono(String.class)
                     .block();
         } catch (Exception e) {
-            log.warn("Failed to fetch OHLCV: instrument: {},  interval: {}, limit {} , toTs {} - {}", instrument, interval, limit, toTs,e.getMessage());
+            log.warn("Failed to fetch OHLCV: endpoint: {}, instrument: {},  interval: {}, limit {} , toTs {} - {}", path, instrument, interval, limit, toTs,e.getMessage());
             return null;
         }
     }

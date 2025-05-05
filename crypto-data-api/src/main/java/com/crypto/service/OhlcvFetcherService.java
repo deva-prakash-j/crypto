@@ -48,6 +48,21 @@ public class OhlcvFetcherService {
 
         return allCandles;
     }
+    
+    public List<CandleDTO> fetchBackfillAll(String instrument, String interval, long from, long to) {
+        long cursor = to;
+        List<CandleDTO> allCandles = new ArrayList<CandleDTO>();
+        
+        String response = client.fetchCandles(instrument, interval, cursor, 2000);
+        if (response.isEmpty() || response == null) return null;
+        List<CandleDTO> batch = mapToDto(response);
+        if(batch.isEmpty() || batch == null) return null;
+            
+
+        allCandles.addAll(batch);
+
+        return allCandles;
+    }
 
     public List<CandleDTO> fetchIncremental(String instrument, String interval, long from) {
         return fetchBackfill(instrument, interval, from, Instant.now().getEpochSecond());

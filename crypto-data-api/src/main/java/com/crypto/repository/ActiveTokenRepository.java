@@ -21,5 +21,11 @@ public interface ActiveTokenRepository extends JpaRepository<ActiveToken, UUID> 
   
   @Query("SELECT t FROM ActiveToken t WHERE t.backfillDay = false")
   List<ActiveToken> findPairToBackfillDay();
+  
+  @Query("SELECT t FROM ActiveToken t WHERE t.backfillHour = false")
+  List<ActiveToken> findPairToBackfillHour();
+  
+  @Query("SELECT t FROM ActiveToken t WHERE t.backfillMinute = false")
+  List<ActiveToken> findPairToBackfillMinute();
 
 }
