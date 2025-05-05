@@ -125,6 +125,7 @@ public class OhlcvBackfillService {
           }
           
           //ohlcvDataRepository.saveAll(entities);
+          dataService.bulkInsertIgnoreConflicts(entities);
           totalSaved += entities.size();
           log.info("Backfilled {} candles so far for {} @ {}", totalSaved, instrument, interval);
           

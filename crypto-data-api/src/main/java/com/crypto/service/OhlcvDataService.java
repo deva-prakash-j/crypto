@@ -2,6 +2,7 @@ package com.crypto.service;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -9,18 +10,16 @@ import org.springframework.stereotype.Service;
 
 import com.crypto.entity.OhlcvData;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 public class OhlcvDataService {
 
+	@Autowired
 	private NamedParameterJdbcTemplate jdbcTemplate;
 	
 	public void bulkInsertIgnoreConflicts(List<OhlcvData> entities) {
 	    String sql = """
 	        INSERT INTO ohlcv_data (
-			  id, timestamp, pair, interval,
+			  timestamp, pair, interval,
 			  open, high, low, close,
 			  first_trade_timestamp, last_trade_timestamp,
 			  first_trade_price, last_trade_price,
@@ -33,7 +32,7 @@ public class OhlcvDataService {
 			  total_trades, total_buy_trades, total_sell_trades, total_unknown_trades,
 			  last_updated
 			) VALUES (
-			  :id, :timestamp, :pair, :interval,
+			  :timestamp, :pair, :interval,
 			  :open, :high, :low, :close,
 			  :firstTradeTimestamp, :lastTradeTimestamp,
 			  :firstTradePrice, :lastTradePrice,
