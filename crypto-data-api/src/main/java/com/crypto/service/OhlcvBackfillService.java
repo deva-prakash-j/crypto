@@ -149,7 +149,7 @@ public class OhlcvBackfillService {
     }
     
     public void backFillHourData() {
-    	List<ActiveToken> list = activeTokenRepository.findPairToBackfillHour();
+    	List<ActiveToken> list = activeTokenRepository.findPairToBackfillMinute();
     	List<OhlcvSyncTracker> trackerList = trackerRepository.findAllByInterval("1d");
     	List<OhlcvSyncTracker> trackerListHour = trackerRepository.findAllByInterval("1m");
     	LocalDateTime fetchFrom;
