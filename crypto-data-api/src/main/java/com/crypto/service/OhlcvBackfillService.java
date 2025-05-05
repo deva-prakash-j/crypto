@@ -151,7 +151,7 @@ public class OhlcvBackfillService {
     public void backFillHourData() {
     	List<ActiveToken> list = activeTokenRepository.findPairToBackfillHour();
     	List<OhlcvSyncTracker> trackerList = trackerRepository.findAllByInterval("1d");
-    	List<OhlcvSyncTracker> trackerListHour = trackerRepository.findAllByInterval("1h");
+    	List<OhlcvSyncTracker> trackerListHour = trackerRepository.findAllByInterval("1m");
     	LocalDateTime fetchFrom;
     	for(ActiveToken entity: list) {
     		try {
@@ -170,7 +170,7 @@ public class OhlcvBackfillService {
     				fetchFrom = lastSyncedAt != null ? lastSyncedAt : fetchFrom;
     			}
     			
-    			backfill(entity.getPair(), "1h", tracker.getFirstAvailableAt(), fetchFrom);
+    			backfill(entity.getPair(), "1m", tracker.getFirstAvailableAt(), fetchFrom);
     			entity.setBackfillHour(true);
     			activeTokenRepository.save(entity);
     		} catch (Exception e) {
