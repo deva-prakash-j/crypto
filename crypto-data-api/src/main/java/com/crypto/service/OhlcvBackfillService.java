@@ -148,6 +148,7 @@ public class OhlcvBackfillService {
     	}
     }
     
+    
     public void backFillHourData() {
     	List<ActiveToken> list = activeTokenRepository.findPairToBackfillMinute();
     	List<OhlcvSyncTracker> trackerList = trackerRepository.findAllByInterval("1d");
