@@ -54,12 +54,12 @@ public class TradingPairSyncScheduler {
             log.error("Failed to initialize SPOT trading pairs", e);
         }
 
-        try {
-            tradingPairService.getTradingPairsByMarketType(MarketType.FUTURES_USDT);
-            log.info("FUTURES_USDT trading pairs initialized.");
-        } catch (Exception e) {
-            log.error("Failed to initialize FUTURES_USDT trading pairs", e);
-        }
+        // try {
+        //     tradingPairService.getTradingPairsByMarketType(MarketType.FUTURES_USDT);
+        //     log.info("FUTURES_USDT trading pairs initialized.");
+        // } catch (Exception e) {
+        //     log.error("Failed to initialize FUTURES_USDT trading pairs", e);
+        // }
 
         try {
             backfillOrchestrator.runInitialBackfill();

@@ -12,7 +12,7 @@ import com.crypto.entity.OhlcvBackfillTracker;
 import io.lettuce.core.dynamic.annotation.Param;
 
 @Repository
-public interface OhlcvBackfillTrackerRepository extends JpaRepository<OhlcvBackfillTracker, String> {
+public interface OhlcvBackfillTrackerRepository extends JpaRepository<OhlcvBackfillTracker, Long> {
 
     Optional<OhlcvBackfillTracker> findBySymbolAndIntervalAndMarketType(String symbol, String interval, MarketType marketType);
 

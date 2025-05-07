@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  app:
+    image: devaprakash/crypto-api-v1:latest
+    container_name: crypto-api-v1
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/crypto
+      SPRING_DATA_REDIS_HOST: redis
+    networks:
+      - crypto_crypto-signal
+
+networks:
+  crypto_crypto-signal:
+    external: true

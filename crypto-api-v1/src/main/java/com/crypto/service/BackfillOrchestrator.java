@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.crypto.dto.TradingPairDTO;
+import com.crypto.entity.MarketType;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +20,7 @@ public class BackfillOrchestrator {
 
     public void runInitialBackfill() {
         List<String> intervals = List.of("1d", "1h", "1m");
-        List<TradingPairDTO> tradingPairs = tradingPairService.getAllActiveTradingPairs();
+        List<TradingPairDTO> tradingPairs = tradingPairService.getTradingPairsByMarketType(MarketType.SPOT);
         long now = 1746599400000L;
 
         for (TradingPairDTO pair : tradingPairs) {
