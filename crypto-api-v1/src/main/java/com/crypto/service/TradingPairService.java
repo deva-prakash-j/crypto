@@ -9,5 +9,6 @@ public interface TradingPairService {
     void syncSpotTradingPairs();
     void syncFuturesTradingPairs();
     List<TradingPairDTO> getTradingPairsByMarketType(MarketType marketType);
+    List<TradingPairDTO> getAllActiveTradingPairs();
 
 }

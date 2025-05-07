@@ -1,15 +1,16 @@
 package com.crypto.scheduler;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.crypto.entity.MarketType;
+import com.crypto.service.BackfillOrchestrator;
 import com.crypto.service.TradingPairService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
@@ -17,6 +18,7 @@ import com.crypto.service.TradingPairService;
 public class TradingPairSyncScheduler {
 
     private final TradingPairService tradingPairService;
+    private final BackfillOrchestrator backfillOrchestrator;
 
     // Runs once every 24 hours
     @Scheduled(cron = "0 0 3 * * *") // At 03:00 AM daily
@@ -57,6 +59,12 @@ public class TradingPairSyncScheduler {
             log.info("FUTURES_USDT trading pairs initialized.");
         } catch (Exception e) {
             log.error("Failed to initialize FUTURES_USDT trading pairs", e);
+        }
+
+        try {
+            backfillOrchestrator.runInitialBackfill();
+        } catch(Exception e) {
+            log.error("Failed to backfill data", e);
         }
     }
 }

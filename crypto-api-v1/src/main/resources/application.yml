@@ -20,4 +20,8 @@ logging:
 app:
   binance:
     spot-host: https://api.binance.com
+    spot-market-info-endpoint: /api/v3/exchangeInfo
+    spot-kline-endpoint: /api/v3/klines
     futures-host: https://fapi.binance.com  
+    futures-market-info-endpoint: /fapi/v1/exchangeInfo
+    futures-kline-endpoint: /fapi/v1/klines

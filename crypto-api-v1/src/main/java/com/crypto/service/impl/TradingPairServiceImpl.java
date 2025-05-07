@@ -1,6 +1,20 @@
 package com.crypto.service.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import static com.crypto.util.Constants.REDIS_KEY_PREFIX;
+import static com.crypto.util.Constants.TTL_HOURS;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.stereotype.Service;
+
 import com.crypto.clients.BinanceMarketClient;
 import com.crypto.clients.response.BinanceExchangeInfoResponse;
 import com.crypto.dto.TradingPairDTO;
@@ -9,22 +23,10 @@ import com.crypto.entity.TradingPairMetadata;
 import com.crypto.mapper.TradingPairMapper;
 import com.crypto.repository.TradingPairMetadataRepository;
 import com.crypto.service.TradingPairService;
-import static com.crypto.util.Constants.REDIS_KEY_PREFIX;
-import static com.crypto.util.Constants.TTL_HOURS;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.stereotype.Service;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -134,6 +136,12 @@ public class TradingPairServiceImpl implements TradingPairService {
         }
 
         return freshData;
+    }
+
+    @Override
+    public List<TradingPairDTO> getAllActiveTradingPairs() {
+        return Stream.concat(getTradingPairsByMarketType(MarketType.SPOT).stream(), getTradingPairsByMarketType(MarketType.FUTURES_USDT).stream())
+            .collect(Collectors.toList());
     }
 
 }
