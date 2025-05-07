@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: crypto-api-v1
+  datasource:
+    url: jdbc:postgresql://srv814560.hstgr.cloud:5432/crypto
+    username: crypto
+    password: crypto-signal
+  data:
+    redis:
+      host: srv814560.hstgr.cloud
+      port: 6379
+      username: default
+      password: b5wmHqFBNyKZ5wH6QmKS5ejp2wBCROki
+      timeout: 10000ms
+
+logging:
+  level:
+    root: INFO
+
+app:
+  binance:
+    spot-host: https://api.binance.com
+    futures-host: https://fapi.binance.com  
