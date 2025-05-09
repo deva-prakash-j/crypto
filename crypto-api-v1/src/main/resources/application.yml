@@ -20,6 +20,9 @@ logging:
 app:
   scheduler:
     enabled: false
+  backfill:
+    ohlcv: false
+    orderDepth: true
   binance:
     spot-host: https://api.binance.com
     spot-market-info-endpoint: /api/v3/exchangeInfo
@@ -27,6 +30,7 @@ app:
     futures-host: https://fapi.binance.com  
     futures-market-info-endpoint: /fapi/v1/exchangeInfo
     futures-kline-endpoint: /fapi/v1/klines
+    book-depth-host: https://data.binance.vision/data/futures/um/daily/bookDepth/
     supported-markets:
       - FUTURES_USDT
     supported-intervals:

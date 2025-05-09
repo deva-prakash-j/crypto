@@ -36,6 +36,9 @@ public class BinanceWebClientDTO {
     @NotBlank
     private String futuresKlineEndpoint;
 
+    @NotBlank
+    private String bookDepthHost;
+
     @NotEmpty
     private List<MarketType> supportedMarkets;
 
