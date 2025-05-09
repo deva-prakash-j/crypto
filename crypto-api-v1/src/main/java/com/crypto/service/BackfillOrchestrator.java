@@ -23,6 +23,7 @@ public class BackfillOrchestrator {
     private final TradingPairService tradingPairService;
     private final BinanceWebClientDTO binanceWebClientDTO;
     private final OrderBookDepthService bookDepthService;
+    private final AggTradeService aggTradeService;
 
 
     @Value("${app.backfill.ohlcv}")
@@ -30,6 +31,9 @@ public class BackfillOrchestrator {
 
     @Value("${app.backfill.orderDepth}")
     private String backfillDepthFlag;
+
+    @Value("${app.backfill.aggTrade}")
+    private String backfillAggTrade;
 
 
 
@@ -51,6 +55,24 @@ public class BackfillOrchestrator {
                 } catch (Exception e) {
                     log.error("❌ Failed backfill for {} {} {}", pair, type, interval, e);
                 }
+            }
+        }
+    }
+
+    public void runAggTradeInitialBackFill(MarketType type) {
+        List<String> supportedPairs = binanceWebClientDTO.getSupportedTokens();
+        if(supportedPairs == null || supportedPairs.isEmpty()) {
+            supportedPairs = tradingPairService.getTradingPairsByMarketType(type).stream()
+                                .map(d -> d.getSymbol())
+                                .collect(Collectors.toList());
+        }
+
+        for (String pair : supportedPairs) {
+            try {
+                log.info("Triggering AddTrade backfill for {} {}",pair, type);
+                aggTradeService.syncAggTradeData(pair, type);
+            } catch (Exception e) {
+                log.error("❌ Failed AddTrade backfill for {} {}", pair, type, e);
             }
         }
     }
@@ -78,7 +100,6 @@ public class BackfillOrchestrator {
             }
         }
 
-        System.out.println(backfillDepthFlag);
         if("true".equalsIgnoreCase(backfillDepthFlag)) {
             log.info("Initiating Order Book Depth backfilling");
             for(MarketType type: supportedMarkets) {
@@ -86,6 +107,17 @@ public class BackfillOrchestrator {
                     bookDepthService.runOrderDepth(type);
                 } catch(Exception e) {
                     log.error("Failed to backfill order Depth data", e);
+                }
+            }
+        }
+
+        if("true".equalsIgnoreCase(backfillAggTrade)) {
+            log.info("Initiating Aggregated Trade backfilling");
+            for(MarketType type: supportedMarkets) {
+                try {
+                    runAggTradeInitialBackFill(type);
+                } catch(Exception e) {
+                    log.error("Failed to backfill Aggregated Trade data", e);
                 }
             }
         }

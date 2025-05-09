@@ -1,5 +1,9 @@
 package com.crypto.util;
 
+import java.net.HttpURLConnection;
+
+import java.net.URL;
+
 public class CommonUtil {
 
     public static long getIntervalMillis(String interval) {
@@ -22,5 +26,20 @@ public class CommonUtil {
             default -> throw new IllegalArgumentException("Unsupported interval: " + interval);
         };
     }  
+
+    public static boolean fileExistsOnRemote(String urlStr) {
+        try {
+            URL url = new URL(urlStr);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("HEAD");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+            int responseCode = connection.getResponseCode();
+            return responseCode == HttpURLConnection.HTTP_OK;
+        } catch (Exception e) {
+            System.err.println("❌ Error checking file " + urlStr + ": " + e.getMessage());
+            return false;
+        }
+    }
     
 }

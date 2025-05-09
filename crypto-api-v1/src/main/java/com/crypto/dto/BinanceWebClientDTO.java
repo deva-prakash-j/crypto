@@ -39,6 +39,15 @@ public class BinanceWebClientDTO {
     @NotBlank
     private String bookDepthHost;
 
+    @NotBlank
+    private String aggTradeHost;
+
+    @NotBlank
+    private String spotAggtradeEndpoint;
+
+    @NotBlank
+    private String futuresAggtradeEndpoint;
+
     @NotEmpty
     private List<MarketType> supportedMarkets;
 

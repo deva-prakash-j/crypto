@@ -85,14 +85,11 @@ public class BinanceMarketClient {
 
     private Mono<Long> binarySearchKline(String symbol, String interval, MarketType marketType,
                                      long low, long high, long intervalMs) {
-
     if ((high - low) <= intervalMs) {
         log.info("First available kline for {} is likely around {}", symbol, high);
         return Mono.just(high);
     }
-
     long mid = (low + high) / 2;
-
     return getClient(marketType).get()
             .uri(uriBuilder -> uriBuilder
                     .path(isSpotMarket(marketType) ? binanceWebClientDTO.getSpotKlineEndpoint() : binanceWebClientDTO.getFuturesKlineEndpoint())

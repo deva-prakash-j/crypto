@@ -20,17 +20,23 @@ logging:
 app:
   scheduler:
     ohlcv: false
+    orderDepth: false
+    aggTrade: false
   backfill:
     ohlcv: false
     orderDepth: false
+    aggTrade: true
   binance:
     spot-host: https://api.binance.com
     spot-market-info-endpoint: /api/v3/exchangeInfo
     spot-kline-endpoint: /api/v3/klines
+    spot-aggtrade-endpoint: /api/v3/aggTrades
     futures-host: https://fapi.binance.com  
     futures-market-info-endpoint: /fapi/v1/exchangeInfo
     futures-kline-endpoint: /fapi/v1/klines
+    futures-aggtrade-endpoint: /fapi/v1/aggTrades
     book-depth-host: https://data.binance.vision/data/futures/um/daily/bookDepth/
+    agg-trade-host: https://data.binance.vision/data/futures/um/daily/aggTrades/
     supported-markets:
       - FUTURES_USDT
     supported-intervals:
