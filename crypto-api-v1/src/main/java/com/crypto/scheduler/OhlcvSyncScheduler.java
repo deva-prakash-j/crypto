@@ -1,7 +1,6 @@
 package com.crypto.scheduler;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -20,7 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@ConditionalOnProperty(name = "app.scheduler.enabled", havingValue = "true", matchIfMissing = false)
+@ConditionalOnProperty(name = "app.scheduler.ohlcv", havingValue = "true", matchIfMissing = false)
 public class OhlcvSyncScheduler {
     
     private final OhlcvBackfillTrackerRepository backfillTrackerRepository; 

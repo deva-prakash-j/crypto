@@ -6,14 +6,13 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -26,6 +25,7 @@ import com.crypto.entity.OrderBookDepthSyncTracker;
 import com.crypto.repository.OrderBookDepthRepository;
 import com.crypto.repository.OrderBookDepthSyncTrackerRepository;
 import com.crypto.service.OrderBookDepthService;
+import com.crypto.service.TradingPairService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +38,7 @@ public class OrderBookDepthServiceImpl implements OrderBookDepthService{
     private final BinanceWebClientDTO binanceWebClientDTO;
     private final OrderBookDepthSyncTrackerRepository syncTrackerRepository;
     private final OrderBookDepthRepository bookDepthRepository;
+    private final TradingPairService tradingPairService;
 
     public void syncBookDepth(String symbol, MarketType type) {
         LocalDate start = syncTrackerRepository.findById(symbol)
@@ -96,6 +97,20 @@ public class OrderBookDepthServiceImpl implements OrderBookDepthService{
 
             start = start.plusDays(1);
         }
+    }
+
+        public void runOrderDepth(MarketType type) {
+        List<String> supportedPairs = binanceWebClientDTO.getSupportedTokens();
+        if(supportedPairs == null || supportedPairs.isEmpty()) {
+            supportedPairs = tradingPairService.getTradingPairsByMarketType(type).stream()
+                                .map(d -> d.getSymbol())
+                                .collect(Collectors.toList());
+        }
+
+        for (String pair : supportedPairs) {
+            syncBookDepth(pair, type);
+        }
+
     }
     
 }

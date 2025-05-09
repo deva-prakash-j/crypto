@@ -55,20 +55,6 @@ public class BackfillOrchestrator {
         }
     }
 
-    public void runOrderDepth(MarketType type) {
-        List<String> supportedPairs = binanceWebClientDTO.getSupportedTokens();
-        if(supportedPairs == null || supportedPairs.isEmpty()) {
-            supportedPairs = tradingPairService.getTradingPairsByMarketType(type).stream()
-                                .map(d -> d.getSymbol())
-                                .collect(Collectors.toList());
-        }
-
-        for (String pair : supportedPairs) {
-            bookDepthService.syncBookDepth(pair, type);
-        }
-
-    }
-
     @EventListener(ApplicationReadyEvent.class)
     public void initializeTradingPairsOnStartup() {
         log.info("Initializing trading pair metadata on application startup...");
@@ -97,7 +83,7 @@ public class BackfillOrchestrator {
             log.info("Initiating Order Book Depth backfilling");
             for(MarketType type: supportedMarkets) {
                 try {
-                    runOrderDepth(type);
+                    bookDepthService.runOrderDepth(type);
                 } catch(Exception e) {
                     log.error("Failed to backfill order Depth data", e);
                 }

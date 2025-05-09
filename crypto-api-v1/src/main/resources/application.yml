@@ -19,10 +19,10 @@ logging:
 
 app:
   scheduler:
-    enabled: false
+    ohlcv: false
   backfill:
     ohlcv: false
-    orderDepth: true
+    orderDepth: false
   binance:
     spot-host: https://api.binance.com
     spot-market-info-endpoint: /api/v3/exchangeInfo
