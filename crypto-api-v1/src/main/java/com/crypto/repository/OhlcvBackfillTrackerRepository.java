@@ -1,5 +1,6 @@
 package com.crypto.repository;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -18,5 +19,8 @@ public interface OhlcvBackfillTrackerRepository extends JpaRepository<OhlcvBackf
 
     	@Query(value = "SELECT * FROM ohlcv_backfill_tracker WHERE symbol = :symbol AND market_type = CAST(:marketType AS market_type_enum) AND interval = :interval", nativeQuery = true)
 	Optional<OhlcvBackfillTracker> findBySymbolAndMarketTypeCastAndInterval(@Param("symbol") String symbol, @Param("marketType") String marketType,@Param("interval") String interval);
+
+	@Query(value = "SELECT * FROM ohlcv_backfill_tracker WHERE market_type = CAST(:marketType AS market_type_enum) AND interval = :interval", nativeQuery = true)
+	List<OhlcvBackfillTracker> findByMarketTypeAndInterval(@Param("marketType") String marketType,@Param("interval") String interval);
 }
 

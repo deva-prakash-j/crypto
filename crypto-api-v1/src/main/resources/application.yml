@@ -18,6 +18,8 @@ logging:
     root: INFO
 
 app:
+  scheduler:
+    enabled: false
   binance:
     spot-host: https://api.binance.com
     spot-market-info-endpoint: /api/v3/exchangeInfo
