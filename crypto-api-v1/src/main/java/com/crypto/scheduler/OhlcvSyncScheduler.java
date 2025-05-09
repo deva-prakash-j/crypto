@@ -23,8 +23,8 @@ import lombok.extern.slf4j.Slf4j;
 @ConditionalOnProperty(name = "app.scheduler.enabled", havingValue = "true", matchIfMissing = false)
 public class OhlcvSyncScheduler {
     
-    private OhlcvBackfillTrackerRepository backfillTrackerRepository; 
-    private BinanceWebClientDTO binanceWebClientDTO;
+    private final OhlcvBackfillTrackerRepository backfillTrackerRepository; 
+    private final BinanceWebClientDTO binanceWebClientDTO;
     private final OhlcvService ohlcvService;
 
     @PostConstruct
@@ -34,8 +34,21 @@ public class OhlcvSyncScheduler {
 
     @Scheduled(cron = "0 */5 * * * *")
     public void syncEveryFiveMinutes() {
+        syncData(List.of("1m", "5m"));
+    }
+
+    @Scheduled(cron = "0 2 * * * *")
+    public void syncEveryOneHour() {
+        syncData(List.of("1h"));
+    }
+
+    @Scheduled(cron = "0 4 0 * * *")
+    public void syncEveryOneDay() {
+        syncData(List.of("1d"));
+    }
+
+    public void syncData(List<String> supportedIntervals) {
         List<MarketType> supportedMarkets = binanceWebClientDTO.getSupportedMarkets();
-        List<String> supportedIntervals = List.of("1m", "5m");
         long now = System.currentTimeMillis();
 
         for(MarketType type: supportedMarkets) {
