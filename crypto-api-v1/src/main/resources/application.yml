@@ -25,3 +25,16 @@ app:
     futures-host: https://fapi.binance.com  
     futures-market-info-endpoint: /fapi/v1/exchangeInfo
     futures-kline-endpoint: /fapi/v1/klines
+    supported-markets:
+      - FUTURES_USDT
+    supported-intervals:
+      - 1d
+      - 1h
+      - 5m
+      - 1m
+    supported-tokens:
+      - BTCUSDT
+      - ETHUSDT
+      - XRPUSDT
+      - SOLUSDT
+      - DOGEUSDT

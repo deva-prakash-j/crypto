@@ -1,10 +1,13 @@
 package com.crypto.scheduler;
 
+import java.util.List;
+
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.crypto.dto.BinanceWebClientDTO;
 import com.crypto.entity.MarketType;
 import com.crypto.service.BackfillOrchestrator;
 import com.crypto.service.TradingPairService;
@@ -19,6 +22,7 @@ public class TradingPairSyncScheduler {
 
     private final TradingPairService tradingPairService;
     private final BackfillOrchestrator backfillOrchestrator;
+    private final BinanceWebClientDTO binanceWebClientDTO;
 
     // Runs once every 24 hours
     @Scheduled(cron = "0 0 3 * * *") // At 03:00 AM daily
@@ -46,25 +50,22 @@ public class TradingPairSyncScheduler {
     @EventListener(ApplicationReadyEvent.class)
     public void initializeTradingPairsOnStartup() {
         log.info("Initializing trading pair metadata on application startup...");
-
-        try {
-            tradingPairService.getTradingPairsByMarketType(MarketType.SPOT);
-            log.info("SPOT trading pairs initialized.");
-        } catch (Exception e) {
-            log.error("Failed to initialize SPOT trading pairs", e);
+        List<MarketType> supportedMarkets = binanceWebClientDTO.getSupportedMarkets();
+        for(MarketType type: supportedMarkets) {
+            try {
+                tradingPairService.getTradingPairsByMarketType(type);
+                log.info("{} trading pairs initialized.", type);
+            } catch (Exception e) {
+                log.error("Failed to initialize {} trading pairs", type, e);
+            }
         }
 
-        // try {
-        //     tradingPairService.getTradingPairsByMarketType(MarketType.FUTURES_USDT);
-        //     log.info("FUTURES_USDT trading pairs initialized.");
-        // } catch (Exception e) {
-        //     log.error("Failed to initialize FUTURES_USDT trading pairs", e);
-        // }
-
-        try {
-            backfillOrchestrator.runInitialBackfill();
-        } catch(Exception e) {
-            log.error("Failed to backfill data", e);
+        for(MarketType type: supportedMarkets) {
+            try {
+                backfillOrchestrator.runInitialBackfill(type);
+            } catch(Exception e) {
+                log.error("Failed to backfill data", e);
+            }
         }
     }
 }

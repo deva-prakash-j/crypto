@@ -1,9 +1,12 @@
 package com.crypto.service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
+import com.crypto.dto.BinanceWebClientDTO;
 import com.crypto.dto.TradingPairDTO;
 import com.crypto.entity.MarketType;
 
@@ -17,19 +20,25 @@ public class BackfillOrchestrator {
 
     private final OhlcvService ohlcvService;
     private final TradingPairService tradingPairService;
+    private final BinanceWebClientDTO binanceWebClientDTO;
 
-    public void runInitialBackfill() {
-        List<String> intervals = List.of("1d", "1h", "1m");
-        List<TradingPairDTO> tradingPairs = tradingPairService.getTradingPairsByMarketType(MarketType.SPOT);
-        long now = 1746599400000L;
+    public void runInitialBackfill(MarketType type) {
+        List<String> intervals = binanceWebClientDTO.getSupportedIntervals();
+        List<String> supportedPairs = binanceWebClientDTO.getSupportedTokens();
+        if(supportedPairs == null || supportedPairs.isEmpty()) {
+            supportedPairs = tradingPairService.getTradingPairsByMarketType(type).stream()
+                                .map(d -> d.getSymbol())
+                                .collect(Collectors.toList());
+        }
+        long now = System.currentTimeMillis();
 
-        for (TradingPairDTO pair : tradingPairs) {
+        for (String pair : supportedPairs) {
             for (String interval : intervals) {
                 try {
-                    log.info("Triggering backfill for {} {} {}", pair.getSymbol(), pair.getMarketType(), interval);
-                    ohlcvService.backfillOhlcv(pair.getSymbol(), interval, pair.getMarketType(), now);
+                    log.info("Triggering backfill for {} {} {}",pair, type, interval);
+                    ohlcvService.backfillOhlcv(pair, interval, type, now);
                 } catch (Exception e) {
-                    log.error("❌ Failed backfill for {} {} {}", pair.getSymbol(), pair.getMarketType(), interval, e);
+                    log.error("❌ Failed backfill for {} {} {}", pair, type, interval, e);
                 }
             }
         }
