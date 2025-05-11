@@ -53,5 +53,7 @@ public class TradingPairMetadata {
     @Column(nullable = false)
     @Builder.Default
     private Boolean isActive = true;
+
+    private String coinalyzeSymbol;
 }
 

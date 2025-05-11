@@ -24,6 +24,7 @@ public class BackfillOrchestrator {
     private final BinanceWebClientDTO binanceWebClientDTO;
     private final OrderBookDepthService bookDepthService;
     private final AggTradeService aggTradeService;
+    private final FundingRateService fundingRateService;
 
 
     @Value("${app.backfill.ohlcv}")
@@ -34,6 +35,9 @@ public class BackfillOrchestrator {
 
     @Value("${app.backfill.aggTrade}")
     private String backfillAggTrade;
+
+    @Value("${app.backfill.fundingRate}")
+    private String backfillFundingRate;
 
 
 
@@ -84,11 +88,14 @@ public class BackfillOrchestrator {
         for(MarketType type: supportedMarkets) {
             try {
                 tradingPairService.getTradingPairsByMarketType(type);
+                tradingPairService.updateTradingPairs(type);
                 log.info("{} trading pairs initialized.", type);
             } catch (Exception e) {
                 log.error("Failed to initialize {} trading pairs", type, e);
             }
         }
+
+    
 
         if("true".equalsIgnoreCase(backfillOhlcvFlag)) {
             for(MarketType type: supportedMarkets) {
@@ -118,6 +125,17 @@ public class BackfillOrchestrator {
                     runAggTradeInitialBackFill(type);
                 } catch(Exception e) {
                     log.error("Failed to backfill Aggregated Trade data", e);
+                }
+            }
+        }
+
+        if("true".equalsIgnoreCase(backfillFundingRate)) {
+            log.info("Initiating Funding Rate backfilling");
+            for(MarketType type: supportedMarkets) {
+                try {
+                    fundingRateService.backFillFundingRate(type);
+                } catch(Exception e) {
+                    log.error("Failed to backfill Funding Rate data", e);
                 }
             }
         }

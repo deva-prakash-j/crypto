@@ -9,9 +9,8 @@ services:
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/crypto
       SPRING_DATA_REDIS_HOST: redis
-      APP_SCHEDULER_ENABLED: "true"
-      APP_BACKFILL_ORDERDEPTH: "true"
-      APP_BACKFILL_AGGTRADE: "true"
+      APP_SCHEDULER_OHLCV: "true"
+      APP_SCHEDULER_ORDERDEPTH: "true"
     networks:
       - crypto_crypto-signal
 

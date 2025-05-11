@@ -2,15 +2,19 @@ package com.crypto.clients;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.crypto.dto.BinanceWebClientDTO;
 import com.crypto.dto.KlineCandleDTO;
+import com.crypto.entity.FundingRate;
 import com.crypto.entity.MarketType;
+import com.crypto.mapper.FundingRateMapper;
 import com.crypto.mapper.KlineMapper;
-import com.crypto.util.BinanceRateLimiter;
+import com.crypto.util.RateLimiter;
 import com.crypto.util.CommonUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -30,12 +34,13 @@ public class BinanceMarketClient {
     private final KlineMapper klineMapper;
     private final ObjectMapper objectMapper;
     private final BinanceWebClientDTO binanceWebClientDTO;
+    private final FundingRateMapper fundingRateMapper;
 
     public Mono<String> getExchangeInfo(MarketType marketType) {
         return getClient(marketType).get()
                 .uri(isSpotMarket(marketType) ? binanceWebClientDTO.getSpotMarketInfoEndpoint() : binanceWebClientDTO.getFuturesMarketInfoEndpoint())
                 .retrieve()
-                .onStatus(status -> status.value() == 429, BinanceRateLimiter::handleRateLimiting)
+                .onStatus(status -> status.value() == 429, RateLimiter::handleRateLimiting)
                 .bodyToMono(String.class)
                 .retryWhen(
                         Retry.backoff(3, Duration.ofSeconds(5))
@@ -55,7 +60,7 @@ public class BinanceMarketClient {
                         .queryParam("limit", 1000)
                         .build())
                 .retrieve()
-                .onStatus(status -> status.value() == 429, BinanceRateLimiter::handleRateLimiting)
+                .onStatus(status -> status.value() == 429, RateLimiter::handleRateLimiting)
                 .bodyToMono(String.class)
                 .retryWhen(
                         Retry.backoff(3, Duration.ofSeconds(5))
@@ -72,6 +77,35 @@ public class BinanceMarketClient {
         } catch (Exception e) {
             log.error("Failed to parse Kline JSON", e);
             throw new RuntimeException("Failed to parse Kline response", e);
+        }
+    }
+
+    public List<FundingRate> getFundingRate(String symbol, MarketType type, Long startTime) {
+        return getClient(type).get()
+            .uri(uriBuilder -> uriBuilder
+                    .path(isSpotMarket(type) ? binanceWebClientDTO.getSpotFundingRateEndpoint() : binanceWebClientDTO.getFuturesFundingRateEndpoint())
+                    .queryParam("symbol", symbol)
+                    .queryParam("startTime", startTime)
+                    .queryParam("limit", 1000)
+                    .build())
+            .retrieve()
+            .onStatus(status -> status.value() == 429, RateLimiter::handleRateLimiting)
+            .bodyToMono(String.class)
+            .retryWhen(
+                    Retry.backoff(3, Duration.ofSeconds(5))
+                            .filter(ex -> ex.getMessage().contains("Rate limited"))
+                            .onRetryExhaustedThrow((spec, signal) -> signal.failure())
+            )
+            .map(raw -> parseFundingRate(raw, type)).block();
+    }
+
+    private List<FundingRate> parseFundingRate(String rawJson, MarketType type) {
+        try {
+            List<Map<String, Object>> raw = objectMapper.readValue(rawJson, new TypeReference<>() {});
+            return fundingRateMapper.mapToFundingRateEntityList(raw, type);
+        } catch (Exception e) {
+            log.error("Failed to parse FundingRate JSON", e);
+            throw new RuntimeException("Failed to parse FundingRate response", e);
         }
     }
 
@@ -99,7 +133,7 @@ public class BinanceMarketClient {
                     .queryParam("limit", 1)
                     .build())
             .retrieve()
-            .onStatus(status -> status.value() == 429, BinanceRateLimiter::handleRateLimiting)
+            .onStatus(status -> status.value() == 429, RateLimiter::handleRateLimiting)
             .bodyToMono(String.class)
             .retryWhen(
                     Retry.backoff(3, Duration.ofSeconds(5))
@@ -119,6 +153,51 @@ public class BinanceMarketClient {
                     return Mono.error(new RuntimeException("Failed during kline binary search", e));
                 }
             });
+    }
+
+    public Long findFirstAvailableFundingRate(String symbol, MarketType marketType) {
+        long low = 1483228800000L; // Jan 1, 2017 UTC
+        long high = System.currentTimeMillis();
+        Long firstTimestamp = null;
+
+        while (low <= high) {
+            long mid = low + (high - low) / 2;
+
+            boolean exists = fundingRateExists(symbol, mid, marketType);
+            if (exists) {
+                firstTimestamp = mid;
+                high = mid - 1;
+            } else {
+                low = mid + 1;
+            }
+        }
+
+        log.info("First available funding rate for {} is likely around {}", symbol, firstTimestamp);
+        return firstTimestamp;
+    }
+
+    private boolean fundingRateExists(String symbol, long startTime, MarketType marketType) {
+        try {
+            String url = UriComponentsBuilder.fromPath(marketType == MarketType.FUTURES_USDT ? binanceWebClientDTO.getFuturesFundingRateEndpoint() : binanceWebClientDTO.getSpotFundingRateEndpoint())
+                    .queryParam("symbol", symbol)
+                    .queryParam("startTime", startTime)
+                    .queryParam("limit", 1)
+                    .build()
+                    .toUriString();
+
+            String response = getClient(marketType).get()
+                    .uri(url)
+                    .retrieve()
+                    .bodyToMono(String.class)
+                    .block();
+
+            List<Map<String, Object>> result = new ObjectMapper().readValue(response, new TypeReference<>() {});
+            log.info("Found total {} result for time between {}", result.size(), startTime);
+            return !result.isEmpty();
+        } catch (Exception e) {
+            log.error("❌ Error checking funding rate at: " + startTime + " → " + e.getMessage());
+            return false;
+        }
     }
 
     private WebClient getClient(MarketType type) {

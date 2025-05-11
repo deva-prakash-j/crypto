@@ -48,6 +48,12 @@ public class BinanceWebClientDTO {
     @NotBlank
     private String futuresAggtradeEndpoint;
 
+    @NotBlank
+    private String futuresFundingRateEndpoint;
+
+    @NotBlank
+    private String spotFundingRateEndpoint;
+
     @NotEmpty
     private List<MarketType> supportedMarkets;
 

@@ -9,10 +9,14 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import lombok.RequiredArgsConstructor;
+
 import static com.crypto.util.Constants.ACCEPT;
-import static com.crypto.util.Constants.APPLICATION_JSON;;
+import static com.crypto.util.Constants.APPLICATION_JSON;
+import static com.crypto.util.Constants.API_KEY;;
 
 @Configuration
+@RequiredArgsConstructor
 public class BeanConfig {
 	
 	@Value("${app.binance.spot-host}")
@@ -20,6 +24,8 @@ public class BeanConfig {
 	
 	@Value("${app.binance.futures-host}")
 	private String futuresHost;
+
+    private final CoinalyzeConfig coinalyzeConfig;
 	
 	private static final int MAX_BUFFER_SIZE = 20 * 1024 * 1024; // 5 MB
 
@@ -41,6 +47,20 @@ public class BeanConfig {
         return WebClient.builder()
                 .baseUrl(futuresHost)
                 .defaultHeader(ACCEPT, APPLICATION_JSON)
+                .exchangeStrategies(ExchangeStrategies.builder()
+                        .codecs(configurer -> configurer
+                            .defaultCodecs()
+                            .maxInMemorySize(MAX_BUFFER_SIZE))
+                        .build())
+                .build();
+    }
+
+    @Bean
+    WebClient coinalyzeWebClient() {
+        return WebClient.builder()
+                .baseUrl(coinalyzeConfig.getHost())
+                .defaultHeader(ACCEPT, APPLICATION_JSON)
+                .defaultHeader(API_KEY, coinalyzeConfig.getApiKey())
                 .exchangeStrategies(ExchangeStrategies.builder()
                         .codecs(configurer -> configurer
                             .defaultCodecs()

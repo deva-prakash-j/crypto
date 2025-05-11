@@ -3,6 +3,7 @@ package com.crypto.service.impl;
 import static com.crypto.util.Constants.REDIS_KEY_PREFIX;
 import static com.crypto.util.Constants.TTL_HOURS;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -17,11 +18,13 @@ import org.springframework.stereotype.Service;
 
 import com.crypto.clients.BinanceMarketClient;
 import com.crypto.clients.response.BinanceExchangeInfoResponse;
+import com.crypto.dto.CoinalyzeMarketInfoDTO;
 import com.crypto.dto.TradingPairDTO;
 import com.crypto.entity.MarketType;
 import com.crypto.entity.TradingPairMetadata;
 import com.crypto.mapper.TradingPairMapper;
 import com.crypto.repository.TradingPairMetadataRepository;
+import com.crypto.service.CoinalyzeService;
 import com.crypto.service.TradingPairService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -38,6 +41,7 @@ public class TradingPairServiceImpl implements TradingPairService {
     private final TradingPairMetadataRepository repository;
     private final ObjectMapper objectMapper;
     private final RedisTemplate<String, String> redisTemplate;
+    private final CoinalyzeService coinalyzeService;
 
     @Override
     public void syncSpotTradingPairs() {
@@ -53,6 +57,7 @@ public class TradingPairServiceImpl implements TradingPairService {
             .map(json -> parseResponse(json, MarketType.FUTURES_USDT))
             .doOnNext(this::saveToDatabase)
             .subscribe();
+        updateTradingPairs(MarketType.FUTURES_USDT);
     }
 
     private List<TradingPairDTO> parseResponse(String json, MarketType marketType) {
@@ -142,6 +147,27 @@ public class TradingPairServiceImpl implements TradingPairService {
     public List<TradingPairDTO> getAllActiveTradingPairs() {
         return Stream.concat(getTradingPairsByMarketType(MarketType.SPOT).stream(), getTradingPairsByMarketType(MarketType.FUTURES_USDT).stream())
             .collect(Collectors.toList());
+    }
+
+    public void updateTradingPairs(MarketType type) {
+        Map<String, CoinalyzeMarketInfoDTO> coinalyzeData = coinalyzeService.fetchMarketData(type)
+                    .stream().collect(Collectors.toMap(CoinalyzeMarketInfoDTO::getSymbolOnExchange, Function.identity()));
+        List<TradingPairMetadata> savedPairs = repository.findByMarketTypeAndIsActiveTrue(type.name());
+        List<TradingPairMetadata> updatedPairs = new ArrayList<>();
+        for (TradingPairMetadata tradingPairMetadata : savedPairs) {
+            if(coinalyzeData.containsKey(tradingPairMetadata.getSymbol())) {
+                tradingPairMetadata.setCoinalyzeSymbol(coinalyzeData.get(tradingPairMetadata.getSymbol()).getSymbol());
+                updatedPairs.add(tradingPairMetadata);
+            }
+        }
+
+        if(updatedPairs.size() > 0) {
+            log.info("Updating the coinalyze mapping for {} pairs", type.name());
+            repository.saveAll(updatedPairs);
+            log.info("Deleting unmapped pairs");
+            repository.deleteUnMappedPairs(type.name());
+        }
+       
     }
 
 }

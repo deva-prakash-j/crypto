@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 import java.time.Duration;
 
 @Slf4j
-public class BinanceRateLimiter {
+public class RateLimiter {
 	
 	private static final int DEFAULT_RETRY_SECONDS = 10;
 
@@ -24,7 +24,7 @@ public class BinanceRateLimiter {
 	    }
 
 	    long finalDelay = waitSeconds;
-	    log.warn("Binance rate limit hit (429). Will delay {} seconds then retry...", finalDelay);
+	    log.warn("Rate limit hit (429). Will delay {} seconds then retry...", finalDelay);
 
 	    return Mono.delay(Duration.ofSeconds(finalDelay))
 	        .then(Mono.error(new RuntimeException("Rate limited: retrying after " + finalDelay + "s")));

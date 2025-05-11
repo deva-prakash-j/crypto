@@ -22,19 +22,23 @@ app:
     ohlcv: false
     orderDepth: false
     aggTrade: false
+    fundingRate: true
   backfill:
     ohlcv: false
     orderDepth: false
-    aggTrade: true
+    aggTrade: false
+    fundingRate: false
   binance:
     spot-host: https://api.binance.com
     spot-market-info-endpoint: /api/v3/exchangeInfo
     spot-kline-endpoint: /api/v3/klines
     spot-aggtrade-endpoint: /api/v3/aggTrades
+    spot-funding-rate-endpoint: /api/v3/fundingRate
     futures-host: https://fapi.binance.com  
     futures-market-info-endpoint: /fapi/v1/exchangeInfo
     futures-kline-endpoint: /fapi/v1/klines
     futures-aggtrade-endpoint: /fapi/v1/aggTrades
+    futures-funding-rate-endpoint: /fapi/v1/fundingRate
     book-depth-host: https://data.binance.vision/data/futures/um/daily/bookDepth/
     agg-trade-host: https://data.binance.vision/data/futures/um/daily/aggTrades/
     supported-markets:
@@ -50,3 +54,9 @@ app:
       - XRPUSDT
       - SOLUSDT
       - DOGEUSDT
+  coinalyze:
+    host: https://api.coinalyze.net
+    future-markets: /v1/future-markets
+    spot-markets: /v1/spot-markets
+    liqidation-history: /v1/liquidation-history
+    api-key: d6132c29-f006-40f9-9459-3f9ba2835b81
