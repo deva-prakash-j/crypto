@@ -16,6 +16,7 @@ import com.crypto.entity.SyncTracker;
 import com.crypto.repository.FundingRateCustomRepository;
 import com.crypto.repository.SyncTrackerRepository;
 import com.crypto.service.FundingRateService;
+import com.crypto.util.Constants;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +31,6 @@ public class FundingRateServiceImpl implements FundingRateService {
     private final SyncTrackerRepository trackerRepository;
     private final FundingRateCustomRepository fundingRateCustomRepository;
 
-    private final String trackerType = "funding_rate";
-
     @Override
     public void backFillFundingRate(MarketType marketType) {
        List<String> supportedPairs = binanceWebClientDTO.getSupportedTokens();
@@ -43,11 +42,11 @@ public class FundingRateServiceImpl implements FundingRateService {
 
     @Override
     public void syncFundingRate(String symbol, MarketType marketType) {
-        SyncTracker fundingRateTracker = trackerRepository.findByMarketTypeAndSymbolAndType(marketType.name(), symbol, trackerType)
+        SyncTracker fundingRateTracker = trackerRepository.findByMarketTypeAndSymbolAndType(marketType.name(), symbol, Constants.FUNDING_RATE)
                 .orElse(SyncTracker.builder()
                     .symbol(symbol)
                     .marketType(marketType)
-                    .type(trackerType)
+                    .type(Constants.FUNDING_RATE)
                     .lastSyncedDate(null).build());
 
         long currentStart;
@@ -63,7 +62,7 @@ public class FundingRateServiceImpl implements FundingRateService {
             log.info("Starting from last synced time {} for {}", fundingRateTracker.getLastSyncedDate(), symbol) ;
         } else {
             currentStart = binanceMarketClient
-                    .findFirstAvailableFundingRate(symbol, marketType);
+                    .findFirstAvailableTime(symbol, marketType, Constants.FUNDING_RATE, null);
             log.info("Detected listing time for {} {}: {}", symbol, marketType, Instant.ofEpochMilli(currentStart));
         }
 

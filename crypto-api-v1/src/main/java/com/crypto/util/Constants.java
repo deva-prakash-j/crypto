@@ -8,4 +8,8 @@ public class Constants {
 	
 	public final static String REDIS_KEY_PREFIX = "trading_pairs:";
 	public final static long TTL_HOURS = 24;
+
+	//request types
+	public final static String FUNDING_RATE = "funding_rate";
+	public final static String OPEN_INTEREST = "open_interest";
 }

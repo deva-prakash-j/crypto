@@ -54,6 +54,9 @@ public class BinanceWebClientDTO {
     @NotBlank
     private String spotFundingRateEndpoint;
 
+    @NotBlank
+    private String futuresOpenInterestEndpoint;
+
     @NotEmpty
     private List<MarketType> supportedMarkets;
 

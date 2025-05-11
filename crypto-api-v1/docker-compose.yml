@@ -11,6 +11,8 @@ services:
       SPRING_DATA_REDIS_HOST: redis
       APP_SCHEDULER_OHLCV: "true"
       APP_SCHEDULER_ORDERDEPTH: "true"
+      APP_SCHEDULER_FUNDINGRATE: "true"
+      APP_SCHEDULER_OPENINTEREST: "true"
     networks:
       - crypto_crypto-signal
 

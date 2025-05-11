@@ -1,6 +1,6 @@
 package com.crypto.entity;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,28 +16,25 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "sync_tracker")
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class SyncTracker {
+@Data
+@Table(name = "open_interest")
+public class OpenInterest {
     
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String symbol;
+    private String interval;
+    private BigDecimal openInterest;
+    private BigDecimal openInterestValue;
+    private Long timestamp;
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "market_type_enum")
     private MarketType marketType;
-
-    private String type;
-
-    private String interval;
-
-    private LocalDate lastSyncedDate;
-
-    private Long lastSyncedAtUnix;
 }

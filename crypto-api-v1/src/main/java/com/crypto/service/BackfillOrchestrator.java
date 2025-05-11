@@ -25,6 +25,7 @@ public class BackfillOrchestrator {
     private final OrderBookDepthService bookDepthService;
     private final AggTradeService aggTradeService;
     private final FundingRateService fundingRateService;
+    private final OpenInterestService openInterestService;
 
 
     @Value("${app.backfill.ohlcv}")
@@ -38,6 +39,9 @@ public class BackfillOrchestrator {
 
     @Value("${app.backfill.fundingRate}")
     private String backfillFundingRate;
+
+    @Value("${app.backfill.openInterest}")
+    private String backfillOpenInterest;
 
 
 
@@ -138,6 +142,10 @@ public class BackfillOrchestrator {
                     log.error("Failed to backfill Funding Rate data", e);
                 }
             }
+        }
+
+        if("true".equalsIgnoreCase(backfillOpenInterest)) {
+            openInterestService.backFillOpenInterest();
         }
     }
 }

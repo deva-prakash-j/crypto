@@ -22,12 +22,14 @@ app:
     ohlcv: false
     orderDepth: false
     aggTrade: false
-    fundingRate: true
+    fundingRate: false
+    openInterest: false
   backfill:
     ohlcv: false
     orderDepth: false
     aggTrade: false
     fundingRate: false
+    openInterest: false
   binance:
     spot-host: https://api.binance.com
     spot-market-info-endpoint: /api/v3/exchangeInfo
@@ -39,6 +41,7 @@ app:
     futures-kline-endpoint: /fapi/v1/klines
     futures-aggtrade-endpoint: /fapi/v1/aggTrades
     futures-funding-rate-endpoint: /fapi/v1/fundingRate
+    futures-open-interest-endpoint: /futures/data/openInterestHist
     book-depth-host: https://data.binance.vision/data/futures/um/daily/bookDepth/
     agg-trade-host: https://data.binance.vision/data/futures/um/daily/aggTrades/
     supported-markets:
