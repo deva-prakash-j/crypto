@@ -42,9 +42,8 @@ public class CoinalyzeMapper {
     }
 
     @SuppressWarnings("unchecked")
-    public List<LiquidationData> mapLiquidationData(Map<String, Object> rawMap, MarketType marketType, String interval) {
+    public List<LiquidationData> mapLiquidationData(Map<String, Object> rawMap, MarketType marketType, String interval, String symbol) {
         List<LiquidationData> candles = new ArrayList<>();
-        String symbol = rawMap.get("symbol").toString();
         List<Map<String, Object>> rawList = (List<Map<String, Object>>) rawMap.get("history");
 
         for (Map<String, Object> raw : rawList) {

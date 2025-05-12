@@ -12,10 +12,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 import com.crypto.dto.BinanceWebClientDTO;
 import com.crypto.dto.KlineCandleDTO;
 import com.crypto.entity.FundingRate;
+import com.crypto.entity.LongShortRatio;
 import com.crypto.entity.MarketType;
 import com.crypto.entity.OpenInterest;
 import com.crypto.mapper.FundingRateMapper;
 import com.crypto.mapper.KlineMapper;
+import com.crypto.mapper.LongShortRatioMapper;
 import com.crypto.mapper.OpenInterestMapper;
 import com.crypto.util.RateLimiter;
 import com.crypto.util.CommonUtil;
@@ -40,6 +42,7 @@ public class BinanceMarketClient {
     private final BinanceWebClientDTO binanceWebClientDTO;
     private final FundingRateMapper fundingRateMapper;
     private final OpenInterestMapper openInterestMapper;
+    private final LongShortRatioMapper longShortRatioMapper;
 
     public Mono<String> getExchangeInfo(MarketType marketType) {
         return getClient(marketType).get()
@@ -151,6 +154,43 @@ public class BinanceMarketClient {
         }
     }
 
+    public List<LongShortRatio> gerLongShortRatio(String symbol, Long startTime, String interval, String type) {
+        return futuresWebClient.get()
+            .uri(uriBuilder -> uriBuilder
+                    .path(getEndpoint(type, null))
+                    .queryParam("symbol", symbol)
+                    .queryParam("startTime", startTime)
+                    .queryParam("limit", 500)
+                    .queryParam("period", interval)
+                    .build())
+            .retrieve()
+            .onStatus(status -> status.value() == 429, RateLimiter::handleRateLimiting)
+            .onStatus(
+                status -> status.value() == 400,
+                response -> response.bodyToMono(String.class).flatMap(body -> {
+                    log.error("400 Bad Request: {}", body);
+                    return Mono.error(new RuntimeException("Bad Request: " + body));
+                })
+            )
+            .bodyToMono(String.class)
+            .retryWhen(
+                    Retry.backoff(3, Duration.ofSeconds(5))
+                            .filter(ex -> ex.getMessage().contains("Rate limited"))
+                            .onRetryExhaustedThrow((spec, signal) -> signal.failure())
+            )
+            .map(raw -> parseLongShortRatio(raw, interval, type)).block();
+    }
+
+    private List<LongShortRatio> parseLongShortRatio(String rawJson, String interval, String type) {
+        try {
+            List<Map<String, Object>> raw = objectMapper.readValue(rawJson, new TypeReference<>() {});
+            return longShortRatioMapper.mapToLongShortRatioEntityList(raw, type, interval);
+        } catch (Exception e) {
+            log.error("Failed to parse Open Interest JSON", e);
+            throw new RuntimeException("Failed to parse Open Interest response", e);
+        }
+    }
+
     public Mono<Long> findFirstAvailableKlineTime(String symbol, String interval, MarketType marketType) {
         long intervalMs = CommonUtil.getIntervalMillis(interval);
         long low = 1483228800000L; // Jan 1, 2017 UTC
@@ -254,6 +294,8 @@ public class BinanceMarketClient {
         return switch(requestType) {
             case Constants.FUNDING_RATE -> marketType == MarketType.FUTURES_USDT ? binanceWebClientDTO.getFuturesFundingRateEndpoint() : binanceWebClientDTO.getSpotFundingRateEndpoint();
             case Constants.OPEN_INTEREST -> binanceWebClientDTO.getFuturesOpenInterestEndpoint();
+            case Constants.TOP_LONG_SHORT -> binanceWebClientDTO.getFuturesTopLongShort();
+            case Constants.GLOBAL_LONG_SHORT -> binanceWebClientDTO.getFuturesGlobalLongShort();
             default -> throw new IllegalArgumentException("Unsupported requestType");
         };
     }

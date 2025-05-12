@@ -27,6 +27,7 @@ public class BackfillOrchestrator {
     private final FundingRateService fundingRateService;
     private final OpenInterestService openInterestService;
     private final LiquidationDataService liquidationDataService;
+    private final LongShortRatioService longShortRatioService;
 
 
     @Value("${app.backfill.ohlcv}")
@@ -46,6 +47,9 @@ public class BackfillOrchestrator {
 
     @Value("${app.backfill.liqidationData}")
     private String backfillLiquidationData;
+
+    @Value("${app.backfill.longShortData}")
+    private String backfillLongShortData;
 
 
 
@@ -154,6 +158,10 @@ public class BackfillOrchestrator {
 
         if("true".equalsIgnoreCase(backfillLiquidationData)) {
             liquidationDataService.backFillLiquidationData();
+        }
+
+        if("true".equalsIgnoreCase(backfillLongShortData)) {
+            longShortRatioService.backFillLongShortData();
         }
     }
 }

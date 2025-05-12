@@ -46,7 +46,7 @@ public class CoinalyzeClient {
             .block();
     }
 
-    public List<LiquidationData> getLiqidityData(MarketType marketType, String symbol, String interval, Long from, Long to) {
+    public List<LiquidationData> getLiqidityData(MarketType marketType, String symbol, String interval, Long from, Long to, String binanceSymbol) {
         return coinalyzeWebClient.get()
             .uri(uriBuilder -> uriBuilder
                     .path(config.getLiqidationHistory())
@@ -62,7 +62,7 @@ public class CoinalyzeClient {
                 Retry.backoff(3, Duration.ofSeconds(5))
                     .filter(ex -> ex.getMessage().contains("Rate limited"))
                     .onRetryExhaustedThrow((spec, signal) -> signal.failure())
-            ).map(rawData -> parseAndMapLiquidationData(rawData, marketType, interval))
+            ).map(rawData -> parseAndMapLiquidationData(rawData, marketType, interval, binanceSymbol))
             .block();
     }
 
@@ -76,10 +76,10 @@ public class CoinalyzeClient {
         }
     }
 
-    private List<LiquidationData> parseAndMapLiquidationData(String rawJson, MarketType marketType, String interval) {
+    private List<LiquidationData> parseAndMapLiquidationData(String rawJson, MarketType marketType, String interval, String symbol) {
         try {
             List<Map<String, Object>> raw = objectMapper.readValue(rawJson, new TypeReference<>() {});
-            return mapper.mapLiquidationData(raw.get(0), marketType, interval);
+            return mapper.mapLiquidationData(raw.get(0), marketType, interval, symbol);
         } catch (Exception e) {
             log.error("Failed to parse Kline JSON", e);
             throw new RuntimeException("Failed to parse Kline response", e);

@@ -57,6 +57,12 @@ public class BinanceWebClientDTO {
     @NotBlank
     private String futuresOpenInterestEndpoint;
 
+    @NotBlank
+    private String futuresTopLongShort;
+
+    @NotBlank
+    private String futuresGlobalLongShort;
+
     @NotEmpty
     private List<MarketType> supportedMarkets;
 

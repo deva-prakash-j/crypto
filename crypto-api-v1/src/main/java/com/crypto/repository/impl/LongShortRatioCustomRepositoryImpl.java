@@ -8,34 +8,36 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Repository;
 
 import com.crypto.entity.LiquidationData;
-import com.crypto.repository.LiquidationDataCustomRepository;
+import com.crypto.entity.LongShortRatio;
+import com.crypto.repository.LongShortRatioCustomRepository;
 
 import lombok.RequiredArgsConstructor;
 
-@Repository
 @RequiredArgsConstructor
-public class LiquidationDataCustomRepositoryImpl implements LiquidationDataCustomRepository {
-    
-     private final NamedParameterJdbcTemplate jdbc;
+@Repository
+public class LongShortRatioCustomRepositoryImpl implements LongShortRatioCustomRepository {
+
+    private final NamedParameterJdbcTemplate jdbc;
 
     private static final String SQL = """
-        INSERT INTO liquidation_data (symbol, interval, market_type, liquidation_long, liquidation_short, timestamp) 
-        VALUES (:symbol, :interval, :marketType, :liquidation_long, :liquidation_short, :timestamp)
-        ON CONFLICT (symbol, market_type, timestamp, interval) DO NOTHING
+        INSERT INTO long_short_ratio (symbol, interval, type, long_account_ratio, short_account_ratio, long_short_ratio, timestamp) 
+        VALUES (:symbol, :interval, :type, :long_account_ratio, :short_account_ratio, :long_short_ratio, :timestamp)
+        ON CONFLICT (symbol, type, timestamp, interval) DO NOTHING
     """;
 
     @Override
-    public void bulkInsertIgnoreConflicts(List<LiquidationData> dataList) {
+    public void bulkInsertIgnoreConflicts(List<LongShortRatio> dataList) {
        if (dataList.isEmpty()) return;
 
         SqlParameterSource[] batchParams = dataList.stream()
         .map(data -> {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("symbol", data.getSymbol());
-            params.addValue("marketType", data.getMarketType().name()); // 👈 convert enum to String
+            params.addValue("type", data.getType()); 
             params.addValue("interval", data.getInterval());
-            params.addValue("liquidation_long", data.getLiquidationLong());
-            params.addValue("liquidation_short", data.getLiquidationShort());
+            params.addValue("long_account_ratio", data.getLongAccountRatio());
+            params.addValue("short_account_ratio", data.getShortAccountRatio());
+            params.addValue("long_short_ratio", data.getLongShortRatio());
             params.addValue("timestamp", data.getTimestamp());
             return params;
         })
@@ -43,5 +45,4 @@ public class LiquidationDataCustomRepositoryImpl implements LiquidationDataCusto
 
         jdbc.batchUpdate(SQL, batchParams);
     }
-
 }

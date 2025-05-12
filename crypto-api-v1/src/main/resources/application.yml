@@ -25,6 +25,7 @@ app:
     fundingRate: false
     openInterest: false
     liqidationData: false
+    longShortData: true
   backfill:
     ohlcv: false
     orderDepth: false
@@ -32,6 +33,7 @@ app:
     fundingRate: false
     openInterest: false
     liqidationData: false
+    longShortData: false
   binance:
     spot-host: https://api.binance.com
     spot-market-info-endpoint: /api/v3/exchangeInfo
@@ -44,6 +46,8 @@ app:
     futures-aggtrade-endpoint: /fapi/v1/aggTrades
     futures-funding-rate-endpoint: /fapi/v1/fundingRate
     futures-open-interest-endpoint: /futures/data/openInterestHist
+    futures-top-long-short: /futures/data/topLongShortAccountRatio
+    futures-global-long-short: /futures/data/globalLongShortAccountRatio
     book-depth-host: https://data.binance.vision/data/futures/um/daily/bookDepth/
     agg-trade-host: https://data.binance.vision/data/futures/um/daily/aggTrades/
     supported-markets:

@@ -6,17 +6,13 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import com.crypto.clients.BinanceMarketClient;
 import com.crypto.clients.CoinalyzeClient;
 import com.crypto.config.CoinalyzeConfig;
-import com.crypto.dto.BinanceWebClientDTO;
 import com.crypto.entity.LiquidationData;
 import com.crypto.entity.MarketType;
-import com.crypto.entity.OpenInterest;
 import com.crypto.entity.SyncTracker;
 import com.crypto.entity.TradingPairMetadata;
 import com.crypto.repository.LiquidationDataCustomRepository;
@@ -36,7 +32,6 @@ public class LiquidationDataServiceImpl implements LiquidationDataService {
     
     private final CoinalyzeConfig config;
     private final CoinalyzeClient client;
-    private final BinanceWebClientDTO binanceWebClientDTO;
     private final TradingPairMetadataRepository metadataRepository; 
     private final SyncTrackerRepository trackerRepository;
     private final LiquidationDataCustomRepository customRepository;
@@ -46,25 +41,25 @@ public class LiquidationDataServiceImpl implements LiquidationDataService {
     @Override
     public void backFillLiquidationData() {
        List<String> supportedIntervals = config.getSupportedIntervals();
-       List<String> supportedPairs = binanceWebClientDTO.getSupportedTokens();
+       List<TradingPairMetadata> metaDataList = metadataRepository.findByMarketTypeAndIsActiveTrue(MarketType.FUTURES_USDT.name());
        Long startTime = LocalDateTime.now().minusDays(25).atZone(ZoneOffset.UTC).toInstant().getEpochSecond();
        Long to = LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant().getEpochSecond();
-       for(String pair: supportedPairs) {
+       for(TradingPairMetadata pair: metaDataList) {
             for(String interval: supportedIntervals) {
                 syncLiquidationData(pair, interval, startTime, to);
             }
        }
     }
 
-    private void syncLiquidationData(String pair, String interval, Long from, Long to) {
-        String symbol = getCoinalyzeSymbol(pair);
+    private void syncLiquidationData(TradingPairMetadata pair, String interval, Long from, Long to) {
+        String symbol =pair.getCoinalyzeSymbol();
         MarketType type = MarketType.FUTURES_USDT;
         Long availableFrom = null;
         log.info("Starting Liquidation backfilling for symbol: {}", symbol);
         if(symbol != null) {
-            SyncTracker fundingRateTracker = trackerRepository.findByMarketTypeAndSymbolAndTypeAndInterval(type.name(), symbol, Constants.LIQUIDATION_DATA, interval)
+            SyncTracker fundingRateTracker = trackerRepository.findByMarketTypeAndSymbolAndTypeAndInterval(type.name(), pair.getSymbol(), Constants.LIQUIDATION_DATA, interval)
                 .orElse(SyncTracker.builder()
-                    .symbol(symbol)
+                    .symbol(pair.getSymbol())
                     .marketType(type)
                     .type(Constants.LIQUIDATION_DATA)
                     .interval(CommonUtil.mapInterval(interval))
@@ -85,7 +80,7 @@ public class LiquidationDataServiceImpl implements LiquidationDataService {
                 queryParams.put("from", from);
                 queryParams.put("to", to);
                 if(availableFrom == null) {
-                    availableFrom = client.findFirstAvailableTime(symbol, Constants.LIQUIDATION_DATA, interval, queryParams);
+                    availableFrom = LocalDateTime.now().minusDays(23).toEpochSecond(ZoneOffset.UTC);
                 }
                 currentStart = availableFrom;
                 log.info("Detected listing time for {} {} {}: {}", symbol, type, interval, Instant.ofEpochSecond(currentStart));
@@ -97,7 +92,7 @@ public class LiquidationDataServiceImpl implements LiquidationDataService {
                 final long end = currentEnd;
 
                 List<LiquidationData> entities = client
-                        .getLiqidityData(MarketType.FUTURES_USDT, symbol, interval, currentStart, to);
+                        .getLiqidityData(MarketType.FUTURES_USDT, symbol, interval, currentStart, to, pair.getSymbol());
 
                 if (entities == null || entities.isEmpty()) {
                     currentStart += batchSize;
@@ -118,14 +113,6 @@ public class LiquidationDataServiceImpl implements LiquidationDataService {
             log.info("✅ Completed Liquidation Data backfill for {} {} [{} - {}]", interval, symbol,
                     Instant.ofEpochSecond(currentStart - batchSize), Instant.ofEpochSecond(to));
         }
-    }
-
-    private String getCoinalyzeSymbol(String symbol) {
-        Optional<TradingPairMetadata> metadata = metadataRepository.findBySymbolAndMarketTypeCast(symbol, MarketType.FUTURES_USDT.name());
-        if(metadata.isPresent()) {
-            return metadata.get().getCoinalyzeSymbol();
-        }
-        return null;
     }
     
 }
