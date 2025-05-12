@@ -38,7 +38,7 @@ public class OhlcvSyncScheduler {
 
     @Scheduled(cron = "0 2 * * * *")
     public void syncEveryOneHour() {
-        syncData(List.of("1h"));
+        syncData(List.of("1h", "15m", "30m"));
     }
 
     @Scheduled(cron = "0 4 0 * * *")

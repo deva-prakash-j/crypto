@@ -34,7 +34,7 @@ public class OpenInterestServiceImpl implements OpenInterestService {
     @Override
     public void backFillOpenInterest() {
         List<MarketType> marketTypes = binanceWebClientDTO.getSupportedMarkets();
-        List<String> intervals = List.of("5m", "1h", "1d");
+        List<String> intervals = List.of("5m","15m", "30m", "1h", "1d");
         List<String> pairs = binanceWebClientDTO.getSupportedTokens();
         Long startTime = LocalDateTime.now().minusDays(25).atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
         Long to = LocalDateTime.now().atZone(ZoneOffset.UTC).toInstant().toEpochMilli();
@@ -50,11 +50,12 @@ public class OpenInterestServiceImpl implements OpenInterestService {
 
     private void syncOpenInterest(MarketType type, String symbol, String interval, Long startTime, Long to) {
 
-        SyncTracker fundingRateTracker = trackerRepository.findByMarketTypeAndSymbolAndType(type.name(), symbol, Constants.OPEN_INTEREST)
+        SyncTracker fundingRateTracker = trackerRepository.findByMarketTypeAndSymbolAndTypeAndInterval(type.name(), symbol, Constants.OPEN_INTEREST, interval)
                 .orElse(SyncTracker.builder()
                     .symbol(symbol)
                     .marketType(type)
                     .type(Constants.OPEN_INTEREST)
+                    .interval(interval)
                     .lastSyncedAtUnix(null).build());
 
         long intervalMs = CommonUtil.getIntervalMillis(interval);

@@ -49,6 +49,8 @@ app:
     supported-intervals:
       - 1d
       - 1h
+      - 30m
+      - 15m
       - 5m
       - 1m
     supported-tokens:
