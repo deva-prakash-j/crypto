@@ -25,7 +25,23 @@ public class CommonUtil {
             case "1M" -> 2_592_000_000L;
             default -> throw new IllegalArgumentException("Unsupported interval: " + interval);
         };
-    }  
+    }
+    
+    public static String mapInterval(String interval) {
+        return switch (interval) {
+            case "1min" -> "1m";
+            case "5min" -> "5m";
+            case "15min" -> "15m";
+            case "30min" -> "30m";
+            case "1hour" -> "1h";
+            case "2hour" -> "2h";
+            case "4hour" -> "4h";
+            case "6hour" -> "6h";
+            case "12hour" -> "12h";
+            case "daily" -> "1d";
+            default -> throw new IllegalArgumentException("Unsupported interval: " + interval);
+        };
+    }
 
     public static boolean fileExistsOnRemote(String urlStr) {
         try {

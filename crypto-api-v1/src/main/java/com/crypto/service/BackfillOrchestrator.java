@@ -26,6 +26,7 @@ public class BackfillOrchestrator {
     private final AggTradeService aggTradeService;
     private final FundingRateService fundingRateService;
     private final OpenInterestService openInterestService;
+    private final LiquidationDataService liquidationDataService;
 
 
     @Value("${app.backfill.ohlcv}")
@@ -42,6 +43,9 @@ public class BackfillOrchestrator {
 
     @Value("${app.backfill.openInterest}")
     private String backfillOpenInterest;
+
+    @Value("${app.backfill.liqidationData}")
+    private String backfillLiquidationData;
 
 
 
@@ -146,6 +150,10 @@ public class BackfillOrchestrator {
 
         if("true".equalsIgnoreCase(backfillOpenInterest)) {
             openInterestService.backFillOpenInterest();
+        }
+
+        if("true".equalsIgnoreCase(backfillLiquidationData)) {
+            liquidationDataService.backFillLiquidationData();
         }
     }
 }

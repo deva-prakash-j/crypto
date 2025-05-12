@@ -24,12 +24,14 @@ app:
     aggTrade: false
     fundingRate: false
     openInterest: false
+    liqidationData: false
   backfill:
     ohlcv: false
     orderDepth: false
     aggTrade: false
     fundingRate: false
     openInterest: false
+    liqidationData: false
   binance:
     spot-host: https://api.binance.com
     spot-market-info-endpoint: /api/v3/exchangeInfo
@@ -60,6 +62,13 @@ app:
       - SOLUSDT
       - DOGEUSDT
   coinalyze:
+    supported-intervals:
+      - 1min
+      - 5min
+      - 15min
+      - 30min
+      - 1hour
+      - daily
     host: https://api.coinalyze.net
     future-markets: /v1/future-markets
     spot-markets: /v1/spot-markets

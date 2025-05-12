@@ -12,4 +12,5 @@ public class Constants {
 	//request types
 	public final static String FUNDING_RATE = "funding_rate";
 	public final static String OPEN_INTEREST = "open_interest";
+	public final static String LIQUIDATION_DATA = "liquidation_data";
 }

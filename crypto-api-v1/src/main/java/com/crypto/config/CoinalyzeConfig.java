@@ -1,9 +1,12 @@
 package com.crypto.config;
 
+import java.util.List;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 @Component
@@ -25,4 +28,7 @@ public class CoinalyzeConfig {
 
     @NotBlank
     private String apiKey;
+
+    @NotEmpty
+    private List<String> supportedIntervals;
 }

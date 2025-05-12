@@ -17,7 +17,8 @@ public class RateLimiter {
 	    long waitSeconds = DEFAULT_RETRY_SECONDS;
 	    try {
 	        if (retryAfterHeader != null) {
-	            waitSeconds = Long.parseLong(retryAfterHeader);
+				double retryAfterDouble = Double.parseDouble(retryAfterHeader);
+				waitSeconds = (long) Math.ceil(retryAfterDouble);
 	        }
 	    } catch (NumberFormatException e) {
 	        log.warn("Invalid Retry-After header: '{}'. Using default {}s", retryAfterHeader, DEFAULT_RETRY_SECONDS);
