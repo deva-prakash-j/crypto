@@ -25,14 +25,14 @@ app:
     fundingRate: false
     openInterest: false
     liqidationData: false
-    longShortData: true
+    longShortData: false
   backfill:
     ohlcv: false
     orderDepth: false
     aggTrade: false
     fundingRate: false
     openInterest: false
-    liqidationData: false
+    liqidationData: true
     longShortData: false
   binance:
     spot-host: https://api.binance.com

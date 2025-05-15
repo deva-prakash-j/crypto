@@ -13,7 +13,8 @@ services:
       APP_SCHEDULER_ORDERDEPTH: "true"
       APP_SCHEDULER_FUNDINGRATE: "true"
       APP_SCHEDULER_OPENINTEREST: "true"
-      APP_SCHEDULER_LIQIDATIONDATA: "true"
+      APP_SCHEDULER_LIQIDATIONDATA: "false"
+      APP_SCHEDULER_LONGSHORTDATA: "true"
     networks:
       - crypto_crypto-signal
 

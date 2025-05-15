@@ -65,6 +65,8 @@ public class LiquidationDataServiceImpl implements LiquidationDataService {
                     .interval(CommonUtil.mapInterval(interval))
                     .lastSyncedAtUnix(null).build());
 
+            if(fundingRateTracker.getLastSyncedAtUnix() != null) return;
+
             long intervalMs = CommonUtil.getIntervalMillis(CommonUtil.mapInterval(interval));
             long batchSize = intervalMs * 1000;
 

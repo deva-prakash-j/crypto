@@ -1,0 +1,8 @@
+pandas
+sqlalchemy
+psycopg2-binary
+pyarrow
+fastparquet
+ta
+scikit-learn
+tensorflow

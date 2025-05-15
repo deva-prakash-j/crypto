@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: crypto-signal-api
+  datasource:
+    url: jdbc:postgresql://srv814560.hstgr.cloud:5432/crypto
+    username: crypto
+    password: crypto-signal
+
+feign:
+  client:
+    config:
+      crypto-data-api: ${CRYPTO_API_URL:http://localhost:8081}
+
+telegram:
+  bot:
+    token: 7296309251:AAGjdEuXbhfZ5YuQwTA8oUIuU5UHVtSapj8
+
+server:
+  port: 4321
